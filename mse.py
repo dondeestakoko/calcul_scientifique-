@@ -38,7 +38,7 @@ def mse(real_data, predicted_data):
     }
     
     # Retourner la MSE moyenne sur toutes les colonnes
-    return sum(mse_values.values()) / len(mse_values)
+    return sum(mse_values.values())
 
 # Fonction de simulation des populations de lapins et de renards
 def optimization(alpha, beta, delta, gamma):
@@ -87,7 +87,12 @@ for alpha in alpha_range:
         for delta in delta_range:
             for gamma in gamma_range:
                 predicted = optimization(alpha, beta, delta, gamma)  # Générer les données prédites
-                score = mse(real_data, predicted)  # Calculer le MSE
+                
+                # Adapter les données prédites à la taille des données réelles
+                sample_rate = len(predicted) // len(real_data)  # Ratio d'échantillonnage
+                predicted_sampled = predicted.iloc[::sample_rate].reset_index(drop=True)  # Sous-échantillonnage
+                
+                score = mse(real_data, predicted_sampled)  # Calculer le MSE
                 print(score, alpha, beta, delta, gamma)  # Afficher le score et les paramètres
                 
                 # Mettre à jour les meilleurs paramètres si un meilleur score est trouvé
@@ -102,24 +107,27 @@ print(f"Meilleur score: {best_score} avec paramètres: {best_params}")
 alpha, beta, delta, gamma = best_params
 predicted_data = optimization(alpha, beta, delta, gamma)
 
-# Visualisation des résultats
-fig, axes = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
+# Sous-échantillonner pour aligner avec les données réelles
+sample_rate = len(predicted_data) // len(real_data)
+predicted_data = predicted_data.iloc[::sample_rate].reset_index(drop=True)
 
-# Graphique pour les lapins
-axes[0].plot(real_data['lapin'], label='Lapins réels', color='blue', linestyle='--', marker='o')
-axes[0].plot(predicted_data['lapin'], label='Lapins prédits', color='red', linestyle='-', marker='x')
-axes[0].set_title('Lapins (Réel vs Prédit)')
-axes[0].set_xlabel('Pas de temps')
-axes[0].set_ylabel('Population')
-axes[0].legend()
+plt.figure(figsize=(12, 6))
 
-# Graphique pour les renards
-axes[1].plot(real_data['renard'], label='Renards réels', color='blue', linestyle='--', marker='o')
-axes[1].plot(predicted_data['renard'], label='Renards prédits', color='red', linestyle='-', marker='x')
-axes[1].set_title('Renards (Réel vs Prédit)')
-axes[1].set_xlabel('Pas de temps')
-axes[1].legend()
+# Tracer les lapins (réels et prédits)
+plt.plot(real_data['lapin'], label='Lapins réels', color='blue', linestyle='--', marker='o')
+plt.plot(predicted_data['lapin'], label='Lapins prédits', color='red', linestyle='-')
 
-# Afficher les graphiques
+# Tracer les renards (réels et prédits)
+plt.plot(real_data['renard'], label='Renards réels', color='green', linestyle='--', marker='o')
+plt.plot(predicted_data['renard'], label='Renards prédits', color='orange', linestyle='-')
+
+# Paramètres du graphique
+plt.title('Populations de lapins et renards (Réel vs Prédit)')
+plt.xlabel('Pas de temps')
+plt.ylabel('Population')
+plt.legend()
+plt.grid()
+
+# Afficher le graphique
 plt.tight_layout()
 plt.show()
