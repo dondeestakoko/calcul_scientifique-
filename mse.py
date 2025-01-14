@@ -38,7 +38,7 @@ def mse(real_data, predicted_data):
     }
     
     # Retourner la MSE moyenne sur toutes les colonnes
-    return sum(mse_values.values())
+    return sum(mse_values.values()) / len(mse_values)
 
 # Fonction de simulation des populations de lapins et de renards
 def optimization(alpha, beta, delta, gamma):
@@ -47,7 +47,7 @@ def optimization(alpha, beta, delta, gamma):
     lapin = [1]
     renard = [2]
     
-    # Simulation sur 100 000 pas de temps
+    # Simulation sur 100 000 pas de temps   
     for _ in range(1, 100_000):
         # Calcul du prochain instant de temps
         time_update = time[-1] + step
@@ -111,23 +111,24 @@ predicted_data = optimization(alpha, beta, delta, gamma)
 sample_rate = len(predicted_data) // len(real_data)
 predicted_data = predicted_data.iloc[::sample_rate].reset_index(drop=True)
 
-plt.figure(figsize=(12, 6))
+# Visualisation des résultats
+fig, axes = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
 
-# Tracer les lapins (réels et prédits)
-plt.plot(real_data['lapin'], label='Lapins réels', color='blue', linestyle='--', marker='o')
-plt.plot(predicted_data['lapin'], label='Lapins prédits', color='red', linestyle='-')
+# Graphique pour les lapins
+axes[0].plot(real_data['lapin'], label='Lapins réels', color='blue', linestyle='--', marker='o')
+axes[0].plot(predicted_data['lapin'], label='Lapins prédits', color='red', linestyle='-', marker='x')
+axes[0].set_title('Lapins (Réel vs Prédit)')
+axes[0].set_xlabel('Pas de temps')
+axes[0].set_ylabel('Population')
+axes[0].legend()
 
-# Tracer les renards (réels et prédits)
-plt.plot(real_data['renard'], label='Renards réels', color='green', linestyle='--', marker='o')
-plt.plot(predicted_data['renard'], label='Renards prédits', color='orange', linestyle='-')
+# Graphique pour les renards
+axes[1].plot(real_data['renard'], label='Renards réels', color='blue', linestyle='--', marker='o')
+axes[1].plot(predicted_data['renard'], label='Renards prédits', color='red', linestyle='-', marker='x')
+axes[1].set_title('Renards (Réel vs Prédit)')
+axes[1].set_xlabel('Pas de temps')
+axes[1].legend()
 
-# Paramètres du graphique
-plt.title('Populations de lapins et renards (Réel vs Prédit)')
-plt.xlabel('Pas de temps')
-plt.ylabel('Population')
-plt.legend()
-plt.grid()
-
-# Afficher le graphique
+# Afficher les graphiques
 plt.tight_layout()
 plt.show()
